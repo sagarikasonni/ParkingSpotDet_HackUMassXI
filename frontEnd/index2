@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parking Detector</title>
+
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+
+    #container {
+      position: relative;
+      height: 100vh;
+    }
+
+    #parkingFeed {
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    #overlay {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      background-color: rgba(38, 38, 38, 0.7);
+      /* Translucent black background */
+      padding: 20px;
+      color: white;
+      text-align: right;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container">
+    <img id="parkingFeed" src="./data/modifiedImg.jpg" alt="Parking Feed">
+    <div id="overlay">
+      <h1>Parking Spot Detector</h1>
+      <p>Number of Cars: <span id="numOfCars"></span></p>
+    </div>
+  </div>
+
+  <script>
+    function updateImage() {
+      const timestamp = new Date().getTime();
+      const imageUrl = `./data/modifiedImg.jpg?${timestamp}`;
+      document.getElementById('parkingFeed').src = imageUrl;
+    }
+
+    function updateData() {
+      const timestamp = new Date().getTime();
+      const dataUrl = `./data/details.json?${timestamp}`;
+      fetch(dataUrl)
+        .then(response => response.json())
+        .then(data => {
+          const numOfCars = document.getElementById('numOfCars');
+          numOfCars.innerHTML = data.numOfCars;
+
+          console.log(data);
+        });
+    }
+
+    // Update the data every second
+    setInterval(updateImage, 1000);
+    setInterval(updateData, 1000);
+  </script>
+
+</body>
+
+</html>
