@@ -35,3 +35,4 @@ class SpotDet:
     # finally return the counter
     def retCount(self):
         return self.cnt
+    # TODO: adding the result from raspberry pi to image path, basically something like a main function
