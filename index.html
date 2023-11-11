@@ -12,14 +12,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aws-sdk/2.1087.0/aws-sdk.min.js"></script>
     <script>
       AWS.config.update({
-          credentials: new AWS.Credentials('YOUR_ACCESS_KEY', 'YOUR_SECRET_KEY'),
-          region: 'YOUR_REGION'
+          credentials: new AWS.Credentials('https://759798708771.signin.aws.amazon.com/console', 'oV941Q=|'),
+          region: 'us-east-1'
       });
 
       const s3 = new AWS.S3();
 
       s3.getObject({
-        Bucket: 'your-s3-bucket-name',
+        Bucket: 'hqew',
         Key: 'path/in/s3/modified_image.jpg',
       }, (err, data) => {
         if (err) {
