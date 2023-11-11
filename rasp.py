@@ -1,41 +1,30 @@
 import os
-import time
 from picamera import PiCamera
-import boto3
+from google.cloud import storage
 
-# Set up AWS credentials and region
-aws_access_key_id = 'https://759798708771.signin.aws.amazon.com/console'
-aws_secret_access_key = 'oV941Q=|'
-region_name = 'us-east-1'
+# Set up Google Cloud credentials and project
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/path/to/your/google/credentials.json"
+project_id = "your-google-cloud-project-id"
 
-# Set up S3
-s3_bucket_name = 'hqew'
-s3_client = boto3.client('s3', aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key, region_name=region_name)
-
-# Set up AWS IoT
-iot_topic = 'parking_spot'
+# Set up Google Cloud Storage
+bucket_name = "your-google-cloud-storage-bucket-name"
+storage_client = storage.Client(project=project_id)
+bucket = storage_client.bucket(bucket_name)
 
 # Set up the camera
 camera = PiCamera()
 
 def capture_image():
-    timestamp = time.strftime("%Y%m%d%H%M%S")
-    image_path = f'/home/pi/images/{timestamp}.jpg'
+    image_path = '/home/sagni/curImg.jpg'
     camera.capture(image_path)
     return image_path
 
-def upload_to_s3(file_path):
+def upload_to_gcs(file_path):
     file_name = os.path.basename(file_path)
-    s3_key = f'images/{file_name}'
-    s3_client.upload_file(file_path, s3_bucket_name, s3_key)
-
-def publish_to_iot():
-    # Implement code to publish a message to the IoT topic
-    pass
+    blob = bucket.blob(f'images/{file_name}')
+    blob.upload_from_filename(file_path)
 
 # Main loop
 while True:
     image_path = capture_image()
-    upload_to_s3(image_path)
-    publish_to_iot()
-    time.sleep(60)  # Capture an image every 60 seconds
+    upload_to_gcs(image_path)
