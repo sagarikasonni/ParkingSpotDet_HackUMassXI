@@ -4,11 +4,11 @@ from picamera import PiCamera
 from google.cloud import storage
 
 # Set up Google Cloud credentials and project
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/path/to/your/google/credentials.json"
-project_id = "your-google-cloud-project-id"
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./credentials.json"
+project_id = "emptyparkingspotdetector"
 
 # Set up Google Cloud Storage
-bucket_name = "your-google-cloud-storage-bucket-name"
+bucket_name = "parking_spot_det"
 storage_client = storage.Client(project=project_id)
 bucket = storage_client.bucket(bucket_name)
 
@@ -16,7 +16,7 @@ bucket = storage_client.bucket(bucket_name)
 camera = PiCamera()
 
 def capture_image():
-    image_path = '/home/sagni/curImg.jpg'
+    image_path = './curImg.jpg'
     camera.capture(image_path)
     return image_path
 
@@ -30,3 +30,4 @@ while True:
     image_path = capture_image()
     upload_to_gcs(image_path)
     time.sleep(1)
+    
