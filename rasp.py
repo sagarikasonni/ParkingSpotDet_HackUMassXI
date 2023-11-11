@@ -1,4 +1,5 @@
 import os
+import time
 from picamera import PiCamera
 from google.cloud import storage
 
@@ -28,3 +29,4 @@ def upload_to_gcs(file_path):
 while True:
     image_path = capture_image()
     upload_to_gcs(image_path)
+    time.sleep(1)
