@@ -48,7 +48,7 @@ def visualize_results(image, filtered_contours, predictions):
     return image
 
 # Load the pre-trained SVM model
-classifier = joblib.load('your_pretrained_model_filename.pkl')  # Replace with your actual filename
+classifier = joblib.load('parking_spot_kmeans.pkl')  # Replace with your actual filename
 
 # Read the input image
 input_image = cv2.imread('test1.jpeg')
