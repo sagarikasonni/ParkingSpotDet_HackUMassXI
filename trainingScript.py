@@ -1,7 +1,7 @@
 import cv2
+import os
 import numpy as np
-from sklearn.svm import SVC
-from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
 import joblib
 
 # Function to extract features from a given image
@@ -27,42 +27,36 @@ def extract_features_from_image(image):
 
     return features
 
-# Function to classify parking spots as free or occupied
-def classify_parking_spots(features, classifier):
-    # Feature scaling
-    features_scaled = StandardScaler().fit_transform(np.array(features).reshape(-1, 1))
+# Specify the path to your dataset folder
+dataset_folder = 'pics'
 
-    # Classify parking spots using the pre-trained SVM model
-    predictions = classifier.predict(features_scaled)
+# Load a single image from the dataset
+filename = os.listdir(dataset_folder)[0]
+image_path = os.path.join(dataset_folder, filename)
+img = cv2.imread(image_path)
 
-    return predictions
+# Check if the image is loaded successfully
+if img is not None:
+    # Print the loaded image for debugging
+    print("Loaded image:", image_path)
 
-# Function to visualize the results
-def visualize_results(image, filtered_contours, predictions):
-    for i, cnt in enumerate(filtered_contours):
-        x, y, w, h = cv2.boundingRect(cnt)
-        status = "Occupied" if predictions[i] == 1 else "Free"
-        cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
-        cv2.putText(image, status, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+    # Extract features from the image
+    all_features = extract_features_from_image(img)
 
-    return image
+    # Convert the feature list to a numpy array
+    features_array = np.array(all_features).reshape(-1, 1)
 
-# Load the pre-trained SVM model
-classifier = joblib.load('parking_spot_kmeans.pkl')  # Replace with your actual filename
+    # Use k-means clustering to identify parking spots
+    n_clusters = 2  # You may adjust this based on the number of parking spot classes you expect
+    n_init_value = 10  # Explicitly set the value for n_init
+    kmeans = KMeans(n_clusters=n_clusters, n_init=n_init_value, random_state=42)
+    kmeans.fit(features_array)
 
-# Read the input image
-input_image = cv2.imread('test1.jpeg')
+    # Assign labels to the clusters
+    labels = kmeans.labels_
 
-# Extract features from the image
-image_features = extract_features_from_image(input_image)
+    # Save the trained k-means model
+    joblib.dump(kmeans, 'parking_spot_kmeans.pkl')
 
-# Classify parking spots
-predictions = classify_parking_spots(image_features, classifier)
-
-# Visualize the results
-output_image = visualize_results(input_image.copy(), [], predictions)
-
-# Display the results
-cv2.imshow('Parking Spots', output_image)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+else:
+    print(f"Error loading image: {image_path}")
