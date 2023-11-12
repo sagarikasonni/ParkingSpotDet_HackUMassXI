@@ -7,7 +7,7 @@ from google.cloud import storage
 subprocess.Popen(["python", "-m", "http.server"])
 
 # Set up Google Cloud Storage configuration
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "../credentials.json"
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./credentials.json"
 project_id = "emptyparkingspotdetector"
 
 # Set up Google Cloud Storage

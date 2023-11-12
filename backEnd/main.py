@@ -7,6 +7,8 @@ import joblib
 
 import os
 import io
+import time
+import json
 
 # Triggered by a change in a storage bucket
 def hello_gcs(cloud_event, context):
@@ -31,8 +33,9 @@ def hello_gcs(cloud_event, context):
 
   pickleFile = download_from_gcs("parking_spot_kmeans.pkl")
   curImg = download_from_gcs("curImg.jpg")
-  modifiedImg = runSpotDet(curImg, pickleFile)
+  modifiedImg, details_json = runSpotDet(curImg, pickleFile)
   upload_to_gcs("modifiedImg.jpg", modifiedImg)
+  upload_to_gcs("details.json", details_json)
 
 # Function to extract features from a given image
 def extract_features_from_image(image):
@@ -48,6 +51,8 @@ def extract_features_from_image(image):
 
 # Function to classify parking spots as free or occupied
 def classify_parking_spots(features, classifier):
+  if (len(features) == 0):
+    return []
   features_scaled = StandardScaler().fit_transform(np.array(features).reshape(-1, 1))
   predictions = classifier.predict(features_scaled)
 
@@ -76,4 +81,11 @@ def runSpotDet(curImg, pickleFile):
 
   _, modified_image_data = cv2.imencode(".jpg", output_image)
   modifiedImg = io.BytesIO(modified_image_data)
-  return modifiedImg
+
+  details_data = {
+    "Current System Time": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()),
+    "Number of Cars": len(predictions),
+  }
+  details_json = io.BytesIO(json.dumps(details_data).encode())
+
+  return modifiedImg, details_json
