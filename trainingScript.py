@@ -1,9 +1,7 @@
 import cv2
-import os
 import numpy as np
 from sklearn.svm import SVC
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
 import joblib
 
 # Function to extract features from a given image
@@ -29,65 +27,42 @@ def extract_features_from_image(image):
 
     return features
 
-# Function to load images from a directory
-def load_images_from_directory(directory):
-    images = []
-    for filename in os.listdir(directory):
-        if filename.endswith(".jpeg") or filename.endswith(".jpg"):
-            path = os.path.join(directory, filename)
-            img = cv2.imread(path)
-            if img is not None:
-                images.append(img)
-    return images
-
-# Function to classify parking spots
-def classify_parking_spots(features, labels):
-    # Check if the number of features and labels is the same
-    if len(features) != len(labels):
-        raise ValueError("Number of features and labels must be the same.")
-
-    # Split the data into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size=0.2, random_state=42)
-
+# Function to classify parking spots as free or occupied
+def classify_parking_spots(features, classifier):
     # Feature scaling
-    scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(np.array(X_train).reshape(-1, 1))
-    X_test_scaled = scaler.transform(np.array(X_test).reshape(-1, 1))
+    features_scaled = StandardScaler().fit_transform(np.array(features).reshape(-1, 1))
 
-    # Train a simple SVM classifier
-    svm_classifier = SVC(kernel='linear')
-    svm_classifier.fit(X_train_scaled, y_train)
+    # Classify parking spots using the pre-trained SVM model
+    predictions = classifier.predict(features_scaled)
 
-    # Predict on the test set
-    y_pred = svm_classifier.predict(X_test_scaled)
+    return predictions
 
-    # Evaluate the model
-    return svm_classifier
+# Function to visualize the results
+def visualize_results(image, filtered_contours, predictions):
+    for i, cnt in enumerate(filtered_contours):
+        x, y, w, h = cv2.boundingRect(cnt)
+        status = "Occupied" if predictions[i] == 1 else "Free"
+        cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        cv2.putText(image, status, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
-# Specify the directory containing your dataset
-dataset_directory = 'pics'
+    return image
 
-# Load images from the directory
-image_list = load_images_from_directory(dataset_directory)
+# Load the pre-trained SVM model
+classifier = joblib.load('parking_spot_kmeans.pkl')  # Replace with your actual filename
 
-# Initialize lists to store features and labels
-all_features = []
-all_labels = []
+# Read the input image
+input_image = cv2.imread('test1.jpeg')
 
-# Loop through each image in the dataset
-for img in image_list:
-    # Extract features from the image
-    features = extract_features_from_image(img)
+# Extract features from the image
+image_features = extract_features_from_image(input_image)
 
-    # User input for labels
-    labels = [1 if input(f"Is parking spot {i} occupied in this image? (1 for yes, 0 for no): ") == '1' else 0 for i in range(len(features))]
+# Classify parking spots
+predictions = classify_parking_spots(image_features, classifier)
 
-    # Append features and labels to the overall lists
-    all_features.extend(features)
-    all_labels.extend(labels)
+# Visualize the results
+output_image = visualize_results(input_image.copy(), [], predictions)
 
-# Train the SVM classifier using the entire dataset
-svm_classifier = classify_parking_spots(all_features, all_labels)
-
-# Save the trained model
-joblib.dump(svm_classifier, 'parking_spot_classifier.pkl')
+# Display the results
+cv2.imshow('Parking Spots', output_image)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
