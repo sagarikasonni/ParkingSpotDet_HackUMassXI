@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-from sklearn.svm import SVC
 from sklearn.preprocessing import StandardScaler
 import joblib
 
@@ -25,7 +24,7 @@ def extract_features_from_image(image):
     # Extract features for each contour
     features = [cv2.contourArea(cnt) for cnt in filtered_contours]
 
-    return features
+    return features, filtered_contours
 
 # Function to classify parking spots as free or occupied
 def classify_parking_spots(features, classifier):
@@ -41,7 +40,7 @@ def classify_parking_spots(features, classifier):
 def visualize_results(image, filtered_contours, predictions):
     for i, cnt in enumerate(filtered_contours):
         x, y, w, h = cv2.boundingRect(cnt)
-        status = "Occupied" if predictions[i] == 1 else "Free"
+        status = "Occupied" if predictions[i] == 0 else "Free"
         cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
         cv2.putText(image, status, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
@@ -54,13 +53,13 @@ classifier = joblib.load('parking_spot_kmeans.pkl')  # Replace with your actual 
 input_image = cv2.imread('test1.jpeg')
 
 # Extract features from the image
-image_features = extract_features_from_image(input_image)
+image_features, filtered_contours = extract_features_from_image(input_image)
 
 # Classify parking spots
 predictions = classify_parking_spots(image_features, classifier)
 
 # Visualize the results
-output_image = visualize_results(input_image.copy(), [], predictions)
+output_image = visualize_results(input_image.copy(), filtered_contours, predictions)
 
 # Display the results
 cv2.imshow('Parking Spots', output_image)
