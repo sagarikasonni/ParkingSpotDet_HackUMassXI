@@ -18,13 +18,15 @@ def extract_features_from_image(image):
     contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     # Filter out small or irrelevant contours
-    min_contour_area = 100
+    min_contour_area = 125
     filtered_contours = [cnt for cnt in contours if cv2.contourArea(cnt) > min_contour_area]
 
     # Extract features for each contour
     features = [cv2.contourArea(cnt) for cnt in filtered_contours]
+    # features = [cv2.contourArea(cnt) for cnt in contours]
 
     return features, filtered_contours
+    # return features
 
 # Function to classify parking spots as free or occupied
 def classify_parking_spots(features, classifier):
@@ -62,6 +64,7 @@ predictions = classify_parking_spots(image_features, classifier)
 output_image = visualize_results(input_image.copy(), filtered_contours, predictions)
 
 # Display the results
-cv2.imshow('Parking Spots', output_image)
-cv2.waitKey(0)
+# cv2.imshow('Parking Spots', output_image)
+cv2.imwrite('modifiedImg.jpg', output_image)
+# cv2.waitKey(0)
 cv2.destroyAllWindows()
