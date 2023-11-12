@@ -7,13 +7,15 @@ import joblib
 # Function to extract features from a given image
 def extract_features_from_image(image):
     # Convert the image to grayscale
-    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    # gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     # Apply Gaussian blur
-    blurred_image = cv2.GaussianBlur(gray_image, (5, 5), 0)
+    # blurred_image = cv2.GaussianBlur(gray_image, (5, 5), 0)
+    # blurred_image = cv2.GaussianBlur(image, (5, 5), 0)
 
     # Use edge detection techniques
-    edges = cv2.Canny(blurred_image, 50, 150)
+    # edges = cv2.Canny(blurred_image, 50, 150)
+    edges = cv2.Canny(image, 50, 150)
 
     # Find contours in the image
     contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
